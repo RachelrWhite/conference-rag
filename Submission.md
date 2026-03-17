@@ -142,3 +142,33 @@ The AI is most useful when you treat it as a knowledgeable collaborator rather t
 ---
 
 
+For each of the following static questions, find the three most similar free embeddings for the corresponding talks, paragraphs, and 3-clusters. Repeat this process with the OpenAI embeddings.
+1. How can I gain a testimony of Jesus Christ?
+Missionary Service Blessed My Life Forever
+by By President M. Russell Ballard
+70%
+Remember What Matters Most
+by By President M. Russell Ballard
+68%
+Be True to God and His Work
+by By Elder Quentin L. Cook
+
+2. What are some ways to deal with challenges in life and find a purpose?
+Hallmarks of Happiness
+by By Elder Gary B. Sabin
+56%
+Compensating Blessings
+by By Bishop Gérald Caussé
+54%
+The Power of Jesus Christ in Our Lives Every Day
+by By Elder Joaquin E. Costa
+3. How can I fix my car if it won't start?
+The Covenant Path: The Way to Eternal Life
+by By Elder Adeyinka A. Ojediran
+37%
+The Sealing Power
+by By Elder D. Todd Christofferson
+29%
+Let God Prevail
+by By President Russell M. Nelson
+
