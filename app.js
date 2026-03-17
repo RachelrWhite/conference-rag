@@ -598,12 +598,16 @@ async function askHolland() {
         // Step 1: Get embedding
         const embedding = await getEmbedding(question);
 
-        // Step 2: Search for similar sentences, then filter to Holland only
-        // Use a larger match_count so Holland talks aren't crowded out by top-20 results
-        const results = await searchSentences(embedding, 100);
-        const hollandResults = results.filter(r => r.speaker && r.speaker.includes('Holland'));
+        // Step 2: Search only Holland talks using speaker-filtered DB function
+        const { data: hollandResults, error: searchError } = await supabaseClient.rpc('match_sentences_by_speaker', {
+            query_embedding: embedding,
+            speaker_filter: 'Jeffrey R. Holland',
+            match_count: 20
+        });
 
-        if (hollandResults.length === 0) {
+        if (searchError) throw new Error(`Search failed: ${searchError.message}`);
+
+        if (!hollandResults || hollandResults.length === 0) {
             showResults('holland', '<div class="no-results">No relevant Jeffrey R. Holland talks found for this question.</div>');
             return;
         }

@@ -129,6 +129,37 @@ AS $$
   ORDER BY sentence_embeddings.embedding <=> query_embedding
   LIMIT match_count;
 $$;
+
+-- Speaker-filtered similarity search (used by "Ask Elder Holland" and similar features)
+CREATE OR REPLACE FUNCTION match_sentences_by_speaker(
+  query_embedding vector(1536),
+  speaker_filter text,
+  match_count int DEFAULT 20
+)
+RETURNS TABLE (
+  id uuid,
+  talk_id uuid,
+  title text,
+  speaker text,
+  url text,
+  text text,
+  similarity float
+)
+LANGUAGE sql STABLE
+AS $$
+  SELECT
+    sentence_embeddings.id,
+    sentence_embeddings.talk_id,
+    sentence_embeddings.title,
+    sentence_embeddings.speaker,
+    sentence_embeddings.url,
+    sentence_embeddings.text,
+    1 - (sentence_embeddings.embedding <=> query_embedding) as similarity
+  FROM sentence_embeddings
+  WHERE sentence_embeddings.speaker ILIKE '%' || speaker_filter || '%'
+  ORDER BY sentence_embeddings.embedding <=> query_embedding
+  LIMIT match_count;
+$$;
 """
 
     url = f"https://api.supabase.com/v1/projects/{SUPABASE_PROJECT_REF}/database/query"
