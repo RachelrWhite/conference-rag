@@ -715,7 +715,7 @@ async function fetchFullTalkText(talks) {
 
     const { data, error } = await supabaseClient
         .from('sentence_embeddings')
-        .select('talk_id, sentence_num, text')
+        .select('talk_id, sentence_num, text, url')
         .in('talk_id', talkIds)
         .order('talk_id')
         .order('sentence_num');
@@ -725,19 +725,22 @@ async function fetchFullTalkText(talks) {
         return talks;
     }
 
-    // Group fetched sentences by talk_id
+    // Group fetched sentences by talk_id, also capture url
     const fullTextMap = {};
+    const urlMap = {};
     for (const row of data) {
         if (!fullTextMap[row.talk_id]) fullTextMap[row.talk_id] = [];
         fullTextMap[row.talk_id].push(row.text);
+        if (row.url) urlMap[row.talk_id] = row.url;
     }
 
-    // Replace snippet text with full talk text
+    // Replace snippet text with full talk text, and fill in url
     return talks.map(talk => ({
         ...talk,
         text: fullTextMap[talk.talk_id]
             ? fullTextMap[talk.talk_id].join(' ')
-            : talk.text
+            : talk.text,
+        url: urlMap[talk.talk_id] || talk.url
     }));
 }
 
