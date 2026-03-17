@@ -599,7 +599,8 @@ async function askHolland() {
         const embedding = await getEmbedding(question);
 
         // Step 2: Search for similar sentences, then filter to Holland only
-        const results = await searchSentences(embedding);
+        // Use a larger match_count so Holland talks aren't crowded out by top-20 results
+        const results = await searchSentences(embedding, 100);
         const hollandResults = results.filter(r => r.speaker && r.speaker.includes('Holland'));
 
         if (hollandResults.length === 0) {
@@ -657,12 +658,12 @@ async function getEmbedding(text) {
 }
 
 // Search sentences using vector similarity
-async function searchSentences(embedding) {
+async function searchSentences(embedding, matchCount = 20) {
     if (!supabaseClient) throw new Error('Supabase not configured');
 
     const { data, error } = await supabaseClient.rpc('match_sentences', {
         query_embedding: embedding,
-        match_count: 20
+        match_count: matchCount
     });
 
     if (error) throw new Error(`Database search failed: ${error.message}`);
