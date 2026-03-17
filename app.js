@@ -351,6 +351,7 @@ async function checkSearchReadiness() {
         setSearchReady('semantic', semanticReady);
 
         // --- 1 generate-answer call (only if semantic pipeline is ready) ---
+        let ragReady = false;
         if (!semanticReady) {
             setSearchReady('rag', false);
         } else {
@@ -358,16 +359,19 @@ async function checkSearchReadiness() {
                 const { data, error: fnError } = await supabaseClient.functions.invoke('generate-answer', {
                     body: { question: 'test', context_talks: [] }
                 });
-                setSearchReady('rag', !fnError || fnError.context?.status !== 404);
+                ragReady = !fnError || fnError.context?.status !== 404;
+                setSearchReady('rag', ragReady);
             } catch {
                 setSearchReady('rag', false);
             }
         }
+        setSearchReady('holland', ragReady);
     } catch (err) {
         console.log('Readiness check failed:', err.message);
         setSearchReady('keyword', false);
         setSearchReady('semantic', false);
         setSearchReady('rag', false);
+        setSearchReady('holland', false);
     } finally {
         readinessCheckRunning = false;
     }
@@ -580,6 +584,62 @@ async function askQuestion() {
 }
 
 // ============================================
+// ASK ELDER HOLLAND
+// ============================================
+
+async function askHolland() {
+    const question = hollandInput ? hollandInput.value.trim() : '';
+    if (!question || !supabaseClient) return;
+
+    showLoading(true);
+    clearResults('holland');
+
+    try {
+        // Step 1: Get embedding
+        const embedding = await getEmbedding(question);
+
+        // Step 2: Search for similar sentences, then filter to Holland only
+        const results = await searchSentences(embedding);
+        const hollandResults = results.filter(r => r.speaker && r.speaker.includes('Holland'));
+
+        if (hollandResults.length === 0) {
+            showResults('holland', '<div class="no-results">No relevant Jeffrey R. Holland talks found for this question.</div>');
+            return;
+        }
+
+        // Step 3: Group by talk and generate answer
+        const topTalks = groupByTalk(hollandResults);
+        const enrichedTalks = await fetchFullTalkText(topTalks);
+        const answer = await generateAnswer(question, enrichedTalks);
+
+        let html = `<div class="result-card rag-answer">
+            <div class="result-card-header">
+                <div class="result-title">Elder Holland Says...</div>
+            </div>
+            <div class="result-sentences">${escapeHtml(answer)}</div>
+        </div>`;
+
+        html += '<div class="result-sources"><strong>Sources:</strong></div>';
+        for (const talk of topTalks) {
+            html += `<div class="result-card result-source">
+                <div class="result-card-header">
+                    <div>
+                        <div class="result-title"><a href="${escapeHtml(talk.url)}" target="_blank" class="result-title-link">${escapeHtml(talk.title)}</a></div>
+                        <div class="result-speaker">by ${escapeHtml(talk.speaker)}</div>
+                    </div>
+                </div>
+            </div>`;
+        }
+        showResults('holland', html);
+
+    } catch (error) {
+        showResults('holland', `<div class="result-error">Error: ${escapeHtml(error.message)}</div>`);
+    } finally {
+        showLoading(false);
+    }
+}
+
+// ============================================
 // SHARED SEARCH UTILITIES
 // ============================================
 
@@ -750,6 +810,14 @@ if (semanticInput) semanticInput.addEventListener('keypress', (e) => {
 if (ragBtn) ragBtn.addEventListener('click', askQuestion);
 if (ragInput) ragInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') askQuestion();
+});
+
+// Holland search
+const hollandInput = document.getElementById('holland-input');
+const hollandBtn = document.getElementById('holland-btn');
+if (hollandBtn) hollandBtn.addEventListener('click', askHolland);
+if (hollandInput) hollandInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') askHolland();
 });
 
 // ============================================

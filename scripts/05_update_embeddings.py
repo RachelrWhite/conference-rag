@@ -107,14 +107,7 @@ def main():
     result = client.table('sentence_embeddings').select('id', count='exact').limit(1).execute()
     total = result.count or 0
 
-    embedded_result = client.table('sentence_embeddings') \
-        .select('id', count='exact') \
-        .not_('embedding', 'is', 'null') \
-        .limit(1).execute()
-    with_emb = embedded_result.count or 0
-
     print(f"\n   Total rows:          {total:,}")
-    print(f"   Rows with embeddings: {with_emb:,}")
 
     print(f"\n🎉 Semantic Search is now ready!")
     print(f"   Refresh your site — the 🧠 Semantic Search panel should turn GREEN.")
