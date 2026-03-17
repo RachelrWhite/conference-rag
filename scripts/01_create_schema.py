@@ -42,8 +42,9 @@ def create_schema():
 -- Enable pgvector extension
 CREATE EXTENSION IF NOT EXISTS vector;
 
--- Create sentence_embeddings table
-CREATE TABLE IF NOT EXISTS sentence_embeddings (
+-- Drop and recreate sentence_embeddings to allow changing vector dimensions
+DROP TABLE IF EXISTS sentence_embeddings CASCADE;
+CREATE TABLE sentence_embeddings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     talk_id UUID NOT NULL,
     title TEXT NOT NULL,
@@ -54,7 +55,7 @@ CREATE TABLE IF NOT EXISTS sentence_embeddings (
     url TEXT,
     sentence_num INTEGER,
     text TEXT NOT NULL,
-    embedding vector(1536),
+    embedding vector(256),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -101,9 +102,13 @@ ON page_views FOR SELECT
 TO anon, authenticated
 USING (true);
 
+-- Drop functions before recreating (needed when changing parameter types)
+DROP FUNCTION IF EXISTS match_sentences(vector, integer);
+DROP FUNCTION IF EXISTS match_sentences_by_speaker(vector, text, integer);
+
 -- Create function for similarity search
 CREATE OR REPLACE FUNCTION match_sentences(
-  query_embedding vector(1536),
+  query_embedding vector(256),
   match_count int DEFAULT 20
 )
 RETURNS TABLE (
@@ -132,7 +137,7 @@ $$;
 
 -- Speaker-filtered similarity search (used by "Ask Elder Holland" and similar features)
 CREATE OR REPLACE FUNCTION match_sentences_by_speaker(
-  query_embedding vector(1536),
+  query_embedding vector(256),
   speaker_filter text,
   match_count int DEFAULT 20
 )

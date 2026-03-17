@@ -52,7 +52,7 @@ def main():
     print("=" * 60)
     print(f"Generating Embeddings for {len(records):,} Sentences")
     print("=" * 60)
-    print(f"   Model: text-embedding-3-small (1,536 dimensions)")
+    print(f"   Model: text-embedding-3-small (256 dimensions)")
     print(f"   Batch size: {BATCH_SIZE}\n")
 
     # Check if there's a partial result we can resume from
@@ -85,7 +85,8 @@ def main():
         try:
             response = client.embeddings.create(
                 model='text-embedding-3-small',
-                input=batch_texts
+                input=batch_texts,
+                dimensions=256
             )
 
             for record, item in zip(batch, response.data):
