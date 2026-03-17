@@ -601,7 +601,7 @@ async function askHolland() {
         // Step 2: Search only Holland talks using speaker-filtered DB function
         const { data: hollandResults, error: searchError } = await supabaseClient.rpc('match_sentences_by_speaker', {
             query_embedding: embedding,
-            speaker_filter: 'Jeffrey R. Holland',
+            speaker_filter: 'Jeffrey',
             match_count: 20
         });
 
