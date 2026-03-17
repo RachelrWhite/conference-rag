@@ -128,7 +128,7 @@ Briefly describe how your AI coding assistant helped you during this assignment:
 
 **Answer:**
 
-The AI assistant (Claude) was genuinely useful throughout this project, especially for tasks that would have taken me a long time to figure out on my own.
+The AI assistant (Claude) was genuinely useful throughout this project, especially for tasks that would have taken me a long time to figure out on my own. Sometimes though, it took a long time to figure thigns out and a few different prompts. 
 
 **What it did well:**
 It was excellent at reading through multiple files at once and understanding how they fit together — for example, tracing why the Holland search was broken required looking at the JavaScript, the SQL schema, and the actual database simultaneously. It caught things I wouldn't have noticed, like the fact that `match_sentences` wasn't returning a `url` column, which caused `href="undefined"` errors. It also wrote solid boilerplate quickly, like the SQL for `match_sentences_by_speaker`, and explained concepts like RLS and JWT clearly in context rather than generically.
@@ -141,13 +141,4 @@ The AI is most useful when you treat it as a knowledgeable collaborator rather t
 
 ---
 
-# FROM CANVAS
-For each of the following static questions, find the three most similar free embeddings for the corresponding talks, paragraphs, and 3-clusters. Repeat this process with the OpenAI embeddings.
-1. How can I gain a testimony of Jesus Christ?
-2. What are some ways to deal with challenges in life and find a purpose?
-3. How can I fix my car if it won't start?
-4. What is the purpose of families?
-5. Why are we here on earth? 
 
-
-Write a few paragraphs to outline what differences the full-text, paragraph, and cluster model made on selections in the semantic search.
